@@ -8,9 +8,23 @@
 <style>
 :root{
   --bg:#0e1116; --panel:#141922; --line:#222a37; --ink:#e6edf6; --dim:#8b97a8;
-  --accent:#6ea8fe; --lit:#1d2a3f; --litbar:#6ea8fe;
+  --accent:#6ea8fe; --accent-ink:#08101f; --lit:#1d2a3f; --litbar:#6ea8fe;
+  --toc-on:#1a2130; --edge-bg:#0e1116; --error:#ffa198; --error-bg:#2a1618;
+  --error-line:#5c2b2f; --spot:rgba(9,12,17,.62);
+  --syntax-red:#ff7b72; --syntax-blue:#a5d6ff; --syntax-comment:#8b949e;
+  --syntax-cyan:#79c0ff; --syntax-purple:#d2a8ff; --syntax-orange:#ffa657;
   --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
   --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,system-ui,sans-serif;
+  color-scheme:dark;
+}
+:root[data-theme="light"]{
+  --bg:#f7f9fc; --panel:#ffffff; --line:#dce2ea; --ink:#172033; --dim:#667085;
+  --accent:#2563eb; --accent-ink:#ffffff; --lit:#e8f0ff; --litbar:#2563eb;
+  --toc-on:#edf3ff; --edge-bg:#f7f9fc; --error:#9f1239; --error-bg:#fff1f2;
+  --error-line:#fecdd3; --spot:rgba(23,32,51,.42);
+  --syntax-red:#cf222e; --syntax-blue:#0a3069; --syntax-comment:#6e7781;
+  --syntax-cyan:#0550ae; --syntax-purple:#8250df; --syntax-orange:#953800;
+  color-scheme:light;
 }
 *{box-sizing:border-box}
 html,body{height:100%}
@@ -19,13 +33,16 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);over
 #app{display:flex;height:100vh}
 
 #toc{width:260px;flex:0 0 260px;background:var(--panel);border-right:1px solid var(--line);
-     overflow-y:auto;padding:18px 0}
+     overflow-y:auto;padding:18px 0;transition:width .22s ease,flex-basis .22s ease,
+     opacity .16s ease,transform .22s ease}
+#app.toc-hidden #toc{width:0;flex-basis:0;opacity:0;transform:translateX(-16px);
+  overflow:hidden;border-right:0;padding-left:0;padding-right:0;pointer-events:none}
 #toc h1{font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;
         color:var(--dim);margin:0 18px 14px}
 .toc-item{padding:9px 18px;font-size:13.5px;line-height:1.35;color:var(--dim);cursor:pointer;
           border-left:2px solid transparent}
 .toc-item:hover{color:var(--ink)}
-.toc-item.on{color:var(--ink);border-left-color:var(--accent);background:#1a2130}
+.toc-item.on{color:var(--ink);border-left-color:var(--accent);background:var(--toc-on)}
 .toc-item .n{font-family:var(--mono);font-size:11px;opacity:.55;margin-right:8px}
 
 main{flex:1;display:flex;flex-direction:column;min-width:0}
@@ -50,14 +67,14 @@ pre.code .gut{flex:0 0 auto;width:34px;text-align:right;margin-right:16px;color:
   opacity:.6;user-select:none}
 pre.code .src{white-space:pre;flex:1}
 
-.hljs-keyword,.hljs-selector-tag,.hljs-literal,.hljs-section{color:#ff7b72}
-.hljs-string,.hljs-regexp,.hljs-addition{color:#a5d6ff}
-.hljs-comment,.hljs-quote{color:#8b949e;font-style:italic}
-.hljs-number,.hljs-symbol,.hljs-attr,.hljs-property,.hljs-variable.language_{color:#79c0ff}
-.hljs-title,.hljs-title.function_,.hljs-title.class_{color:#d2a8ff}
-.hljs-built_in,.hljs-type,.hljs-params,.hljs-attribute{color:#ffa657}
-.hljs-meta,.hljs-doctag{color:#8b949e}
-.hljs-deletion{color:#ffa198}
+.hljs-keyword,.hljs-selector-tag,.hljs-literal,.hljs-section{color:var(--syntax-red)}
+.hljs-string,.hljs-regexp,.hljs-addition{color:var(--syntax-blue)}
+.hljs-comment,.hljs-quote{color:var(--syntax-comment);font-style:italic}
+.hljs-number,.hljs-symbol,.hljs-attr,.hljs-property,.hljs-variable.language_{color:var(--syntax-cyan)}
+.hljs-title,.hljs-title.function_,.hljs-title.class_{color:var(--syntax-purple)}
+.hljs-built_in,.hljs-type,.hljs-params,.hljs-attribute{color:var(--syntax-orange)}
+.hljs-meta,.hljs-doctag{color:var(--syntax-comment)}
+.hljs-deletion{color:var(--error)}
 
 .mermaid-wrap{flex:1;display:flex;align-items:center;justify-content:center;min-height:0}
 .mermaid-wrap svg{width:100%;height:100%;max-width:100%!important}
@@ -68,18 +85,18 @@ pre.code .src{white-space:pre;flex:1}
 .mermaid-wrap.nolit .node{opacity:1}
 .mermaid-wrap .edgePath{opacity:.55}
 .mermaid-wrap .edgeLabel{opacity:.85}
-.mermaid-wrap .edgeLabel rect,.mermaid-wrap .edgeLabel .labelBkg{fill:#0e1116!important;
-  background-color:#0e1116!important;opacity:1!important}
-.mermaid-wrap .edgeLabel foreignObject div{background:#0e1116!important;padding:0 5px}
+.mermaid-wrap .edgeLabel rect,.mermaid-wrap .edgeLabel .labelBkg{fill:var(--edge-bg)!important;
+  background-color:var(--edge-bg)!important;opacity:1!important}
+.mermaid-wrap .edgeLabel foreignObject div{background:var(--edge-bg)!important;padding:0 5px}
 
 .mermaid-wrap{flex-direction:column;gap:14px}
-.mmerr{color:#ffa198;background:#2a1618;border:1px solid #5c2b2f;border-radius:8px;
+.mmerr{color:var(--error);background:var(--error-bg);border:1px solid var(--error-line);border-radius:8px;
   padding:11px 14px;font-family:var(--mono);font-size:13px;align-self:stretch}
 
 .shot{position:relative;align-self:flex-start;max-width:100%}
 .shot img{max-width:100%;border-radius:10px;border:1px solid var(--line);display:block}
 .spot{position:absolute;border:2px solid var(--accent);border-radius:6px;
-  box-shadow:0 0 0 9999px rgba(9,12,17,.62);transition:all .4s}
+  box-shadow:0 0 0 9999px var(--spot);transition:all .4s}
 
 #say{flex:0 0 auto;padding:16px 56px 12px;font-size:15.5px;line-height:1.5;color:var(--dim);
   border-top:1px solid var(--line);min-height:64px}
@@ -93,15 +110,24 @@ pre.code .src{white-space:pre;flex:1}
 #ctl button{background:none;border:1px solid var(--line);color:var(--dim);border-radius:6px;
   padding:5px 11px;font:inherit;cursor:pointer}
 #ctl button:hover{color:var(--ink);border-color:var(--dim)}
+#ctl button[aria-pressed="true"]{color:var(--ink);border-color:var(--accent);background:var(--lit)}
 #ctl .spacer{flex:1}
 
 #cover{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;
   align-items:center;justify-content:center;gap:22px;z-index:9;text-align:center;padding:32px}
 #cover h1{font-size:36px;font-weight:600;margin:0;max-width:24ch;line-height:1.2}
 #cover p{color:var(--dim);margin:0;font-family:var(--mono);font-size:13px}
-#cover button{background:var(--accent);color:#08101f;border:0;border-radius:999px;
+#cover button{background:var(--accent);color:var(--accent-ink);border:0;border-radius:999px;
   padding:13px 30px;font:600 15px var(--sans);cursor:pointer}
 #cover.gone{display:none}
+
+@media (max-width:760px){
+  #toc{position:fixed;inset:0 auto 0 0;z-index:7;box-shadow:12px 0 32px rgba(0,0,0,.2)}
+  #stage{padding:30px 24px 16px}
+  #say{padding:14px 24px 10px}
+  #ctl{padding:10px 24px 14px;gap:8px;flex-wrap:wrap}
+  #ctl .hint{display:none}
+}
 </style>
 </head>
 <body>
@@ -117,9 +143,12 @@ pre.code .src{white-space:pre;flex:1}
       <button data-act="play">pause</button>
       <button data-act="next">next &rarr;</button>
       <button data-act="rate" id="rate" title="playback speed">1&times;</button>
+      <button data-act="toc" id="tocbtn" title="show or hide slides" aria-pressed="false">hide slides</button>
+      <button data-act="theme" id="themebtn" title="switch color theme">light mode</button>
+      <button data-act="fullscreen" id="fullscreenbtn" title="enter full screen">full screen</button>
       <span class="spacer"></span>
       <span id="pos"></span>
-      <span>space&nbsp;pause &middot; &larr;&rarr;&nbsp;step &middot; &uarr;&darr;&nbsp;slide &middot; [&nbsp;]&nbsp;speed</span>
+      <span class="hint">space&nbsp;pause &middot; arrows&nbsp;navigate &middot; S&nbsp;slides &middot; T&nbsp;theme &middot; F&nbsp;full screen</span>
     </div>
   </main>
 </div>
@@ -136,6 +165,62 @@ pre.code .src{white-space:pre;flex:1}
 <script>
 const D = window.DECK, S = D.slides, au = document.getElementById('au');
 let si = 0, ti = 0, playing = false;
+
+/* Display preferences survive reloads without becoming part of deck data. */
+let theme = 'dark', tocHidden = false;
+try {
+  theme = localStorage.getItem('explain-theme')
+    || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+  const savedToc = localStorage.getItem('explain-toc-hidden');
+  tocHidden = savedToc === null ? matchMedia('(max-width: 760px)').matches : savedToc === 'true';
+} catch (e) {}
+
+function mermaidTheme(){
+  if (!window.mermaid) return;
+  const css = getComputedStyle(document.documentElement);
+  mermaid.initialize({startOnLoad:false, theme:theme === 'dark' ? 'dark' : 'default',
+    htmlLabels:false, flowchart:{htmlLabels:false, curve:'basis'},
+    themeVariables:{background:css.getPropertyValue('--bg').trim(),
+      primaryColor:css.getPropertyValue('--panel').trim(),
+      primaryTextColor:css.getPropertyValue('--ink').trim(),
+      primaryBorderColor:css.getPropertyValue('--line').trim(),
+      lineColor:css.getPropertyValue('--dim').trim(), fontSize:'15px',
+      edgeLabelBackground:css.getPropertyValue('--edge-bg').trim()}});
+}
+
+function setTheme(value, rerender){
+  theme = value === 'light' ? 'light' : 'dark';
+  document.documentElement.dataset.theme = theme;
+  const btn = document.getElementById('themebtn');
+  btn.textContent = theme === 'dark' ? 'light mode' : 'dark mode';
+  btn.setAttribute('aria-label', `switch to ${theme === 'dark' ? 'light' : 'dark'} mode`);
+  try { localStorage.setItem('explain-theme', theme); } catch (e) {}
+  mermaidTheme();
+  if (rerender && S[si].kind === 'mermaid') buildSlide(S[si]);
+}
+
+function setToc(hidden){
+  tocHidden = hidden;
+  document.getElementById('app').classList.toggle('toc-hidden', hidden);
+  const btn = document.getElementById('tocbtn');
+  btn.textContent = hidden ? 'show slides' : 'hide slides';
+  btn.setAttribute('aria-pressed', String(hidden));
+  try { localStorage.setItem('explain-toc-hidden', hidden); } catch (e) {}
+}
+
+function syncFullscreen(){
+  const on = !!document.fullscreenElement;
+  const btn = document.getElementById('fullscreenbtn');
+  btn.textContent = on ? 'exit full screen' : 'full screen';
+  btn.setAttribute('aria-pressed', String(on));
+}
+
+async function toggleFullscreen(){
+  try {
+    if (document.fullscreenElement) await document.exitFullscreen();
+    else await document.documentElement.requestFullscreen();
+  } catch (e) {}
+}
 
 /* Playback speed. Setting src resets playbackRate in some browsers, so the
    chosen rate is reapplied on every clip rather than set once. */
@@ -327,8 +412,13 @@ document.getElementById('ctl').addEventListener('click', e => {
   if (act === 'next') next();
   else if (act === 'prev') prev();
   else if (act === 'rate') setRate(RATES[(RATES.indexOf(rate) + 1) % RATES.length]);
+  else if (act === 'toc') setToc(!tocHidden);
+  else if (act === 'theme') setTheme(theme === 'dark' ? 'light' : 'dark', true);
+  else if (act === 'fullscreen') toggleFullscreen();
   else if (act === 'play'){ au.paused ? au.play() : au.pause(); playing = !au.paused; syncBtn(); }
 });
+
+document.addEventListener('fullscreenchange', syncFullscreen);
 
 document.addEventListener('keydown', e => {
   if (document.getElementById('cover').classList.contains('gone') === false) return;
@@ -340,6 +430,9 @@ document.addEventListener('keydown', e => {
   else if (k === 'ArrowUp' && si > 0) goto(si - 1, 0);
   else if (k === ']') bumpRate(1);
   else if (k === '[') bumpRate(-1);
+  else if (k.toLowerCase() === 's') setToc(!tocHidden);
+  else if (k.toLowerCase() === 't') setTheme(theme === 'dark' ? 'light' : 'dark', true);
+  else if (k.toLowerCase() === 'f') toggleFullscreen();
 });
 
 /* Build the sidebar and cover, then wait for the click Chrome requires before
@@ -360,11 +453,9 @@ document.addEventListener('keydown', e => {
     if (item) goto(+item.dataset.i, 0);
   });
 
-  if (window.mermaid) mermaid.initialize({startOnLoad: false, theme: 'dark',
-    htmlLabels: false, flowchart: {htmlLabels: false, curve: 'basis'},
-    themeVariables: {background: '#0e1116', primaryColor: '#141922', primaryTextColor: '#e6edf6',
-      primaryBorderColor: '#2c3a4f', lineColor: '#5a6b82', fontSize: '15px',
-      edgeLabelBackground: '#0e1116'}});
+  setTheme(theme, false);
+  setToc(tocHidden);
+  syncFullscreen();
 
   setRate(RATES.includes(rate) ? rate : 1);
 
