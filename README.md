@@ -10,6 +10,8 @@ network, no player to install.
 
 Speech is synthesised on your machine. Your code never leaves it.
 
+![Example narrated architecture walkthrough](assets/explain-player.png)
+
 ## Install
 
 ```bash
