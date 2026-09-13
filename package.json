@@ -1,0 +1,11 @@
+{
+  "name": "explain-skill",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Turn an explanation into a narrated, self-playing slide deck.",
+  "dependencies": {
+    "@breezystack/lamejs": "^1.2.7",
+    "kokoro-js": "^1.2.1"
+  }
+}

@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explainer</title>
+<!--LIBS-->
+<style>
+:root{
+  --bg:#0e1116; --panel:#141922; --line:#222a37; --ink:#e6edf6; --dim:#8b97a8;
+  --accent:#6ea8fe; --lit:#1d2a3f; --litbar:#6ea8fe;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);overflow:hidden}
+
+#app{display:flex;height:100vh}
+
+#toc{width:260px;flex:0 0 260px;background:var(--panel);border-right:1px solid var(--line);
+     overflow-y:auto;padding:18px 0}
+#toc h1{font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;
+        color:var(--dim);margin:0 18px 14px}
+.toc-item{padding:9px 18px;font-size:13.5px;line-height:1.35;color:var(--dim);cursor:pointer;
+          border-left:2px solid transparent}
+.toc-item:hover{color:var(--ink)}
+.toc-item.on{color:var(--ink);border-left-color:var(--accent);background:#1a2130}
+.toc-item .n{font-family:var(--mono);font-size:11px;opacity:.55;margin-right:8px}
+
+main{flex:1;display:flex;flex-direction:column;min-width:0}
+#stage{flex:1;overflow:auto;padding:44px 56px 20px;display:flex;flex-direction:column}
+h2.title{font-size:30px;line-height:1.2;margin:0 0 6px;font-weight:600;letter-spacing:-.01em}
+.subtitle{font-family:var(--mono);font-size:12.5px;color:var(--dim);margin:0 0 26px}
+
+ul.bullets{list-style:none;padding:0;margin:8px 0;font-size:19px;line-height:1.6}
+ul.bullets li{padding:8px 0 8px 26px;position:relative;opacity:.32;transition:opacity .35s}
+ul.bullets li::before{content:"";position:absolute;left:4px;top:19px;width:7px;height:7px;
+  border-radius:50%;background:var(--dim)}
+ul.bullets li.seen{opacity:.5}
+ul.bullets li.on{opacity:1}
+ul.bullets li.on::before{background:var(--accent);box-shadow:0 0 0 4px rgba(110,168,254,.16)}
+
+pre.code{margin:0;background:var(--panel);border:1px solid var(--line);border-radius:10px;
+  overflow:auto;font-family:var(--mono);font-size:14px;line-height:1.65;padding:14px 0}
+pre.code .row{display:flex;padding:0 16px;opacity:.38;transition:opacity .3s,background .3s;
+  border-left:2px solid transparent}
+pre.code .row.on{opacity:1;background:var(--lit);border-left-color:var(--litbar)}
+pre.code .gut{flex:0 0 auto;width:34px;text-align:right;margin-right:16px;color:var(--dim);
+  opacity:.6;user-select:none}
+pre.code .src{white-space:pre;flex:1}
+
+.hljs-keyword,.hljs-selector-tag,.hljs-literal,.hljs-section{color:#ff7b72}
+.hljs-string,.hljs-regexp,.hljs-addition{color:#a5d6ff}
+.hljs-comment,.hljs-quote{color:#8b949e;font-style:italic}
+.hljs-number,.hljs-symbol,.hljs-attr,.hljs-property,.hljs-variable.language_{color:#79c0ff}
+.hljs-title,.hljs-title.function_,.hljs-title.class_{color:#d2a8ff}
+.hljs-built_in,.hljs-type,.hljs-params,.hljs-attribute{color:#ffa657}
+.hljs-meta,.hljs-doctag{color:#8b949e}
+.hljs-deletion{color:#ffa198}
+
+.mermaid-wrap{flex:1;display:flex;align-items:center;justify-content:center;min-height:0}
+.mermaid-wrap svg{width:100%;height:100%;max-width:100%!important}
+.mermaid-wrap .node{opacity:.35;transition:opacity .35s}
+.mermaid-wrap .node.on{opacity:1}
+.mermaid-wrap .node.on rect,.mermaid-wrap .node.on circle,.mermaid-wrap .node.on polygon,
+.mermaid-wrap .node.on path{stroke:var(--accent)!important;stroke-width:2.5px!important}
+.mermaid-wrap.nolit .node{opacity:1}
+.mermaid-wrap .edgePath{opacity:.55}
+.mermaid-wrap .edgeLabel{opacity:.85}
+.mermaid-wrap .edgeLabel rect,.mermaid-wrap .edgeLabel .labelBkg{fill:#0e1116!important;
+  background-color:#0e1116!important;opacity:1!important}
+.mermaid-wrap .edgeLabel foreignObject div{background:#0e1116!important;padding:0 5px}
+
+.mermaid-wrap{flex-direction:column;gap:14px}
+.mmerr{color:#ffa198;background:#2a1618;border:1px solid #5c2b2f;border-radius:8px;
+  padding:11px 14px;font-family:var(--mono);font-size:13px;align-self:stretch}
+
+.shot{position:relative;align-self:flex-start;max-width:100%}
+.shot img{max-width:100%;border-radius:10px;border:1px solid var(--line);display:block}
+.spot{position:absolute;border:2px solid var(--accent);border-radius:6px;
+  box-shadow:0 0 0 9999px rgba(9,12,17,.62);transition:all .4s}
+
+#say{flex:0 0 auto;padding:16px 56px 12px;font-size:15.5px;line-height:1.5;color:var(--dim);
+  border-top:1px solid var(--line);min-height:64px}
+#say b{color:var(--ink);font-weight:400}
+
+#bar{height:3px;background:var(--line)}
+#fill{height:100%;width:0;background:var(--accent);transition:width .2s linear}
+
+#ctl{flex:0 0 auto;display:flex;align-items:center;gap:16px;padding:10px 56px 16px;
+  font-size:12.5px;color:var(--dim);font-family:var(--mono)}
+#ctl button{background:none;border:1px solid var(--line);color:var(--dim);border-radius:6px;
+  padding:5px 11px;font:inherit;cursor:pointer}
+#ctl button:hover{color:var(--ink);border-color:var(--dim)}
+#ctl .spacer{flex:1}
+
+#cover{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:22px;z-index:9;text-align:center;padding:32px}
+#cover h1{font-size:36px;font-weight:600;margin:0;max-width:24ch;line-height:1.2}
+#cover p{color:var(--dim);margin:0;font-family:var(--mono);font-size:13px}
+#cover button{background:var(--accent);color:#08101f;border:0;border-radius:999px;
+  padding:13px 30px;font:600 15px var(--sans);cursor:pointer}
+#cover.gone{display:none}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <aside id="toc"><h1>Slides</h1><div id="toclist"></div></aside>
+  <main>
+    <div id="stage"></div>
+    <div id="say"></div>
+    <div id="bar"><div id="fill"></div></div>
+    <div id="ctl">
+      <button data-act="prev">&larr; back</button>
+      <button data-act="play">pause</button>
+      <button data-act="next">next &rarr;</button>
+      <button data-act="rate" id="rate" title="playback speed">1&times;</button>
+      <span class="spacer"></span>
+      <span id="pos"></span>
+      <span>space&nbsp;pause &middot; &larr;&rarr;&nbsp;step &middot; &uarr;&darr;&nbsp;slide &middot; [&nbsp;]&nbsp;speed</span>
+    </div>
+  </main>
+</div>
+
+<div id="cover">
+  <h1 id="covertitle"></h1>
+  <p id="covermeta"></p>
+  <button id="start">Play explainer</button>
+</div>
+
+<audio id="au"></audio>
+
+<script>window.DECK = /*DECK*/null;</script>
+<script>
+const D = window.DECK, S = D.slides, au = document.getElementById('au');
+let si = 0, ti = 0, playing = false;
+
+/* Playback speed. Setting src resets playbackRate in some browsers, so the
+   chosen rate is reapplied on every clip rather than set once. */
+const RATES = [0.75, 1, 1.25, 1.5, 1.75, 2];
+let rate = 1;
+try { rate = Number(localStorage.getItem('explain-rate')) || 1; } catch (e) {}
+
+function setRate(r){
+  rate = r;
+  au.playbackRate = r;
+  document.getElementById('rate').textContent = r + '\u00d7';
+  try { localStorage.setItem('explain-rate', r); } catch (e) {}
+}
+
+function bumpRate(dir){
+  const i = RATES.indexOf(rate);
+  setRate(RATES[Math.min(RATES.length - 1, Math.max(0, (i < 0 ? 1 : i) + dir))]);
+}
+
+/* Parse "1-8" or "3,7,10-12" into a Set of line numbers. Steps describe the
+   lines they talk about the way a person would, not as an array of indices. */
+function lineSet(spec){
+  const out = new Set();
+  String(spec).split(',').forEach(part => {
+    const [a,b] = part.trim().split('-').map(Number);
+    for (let i = a; i <= (b === undefined ? a : b); i++) out.add(i);
+  });
+  return out;
+}
+
+/* highlight.js emits spans that straddle newlines, so a naive split shatters
+   them. Carry the open tags across each break instead. */
+function splitHighlighted(html){
+  const open = [], lines = [];
+  for (const line of html.split('\n')){
+    let s = open.join('') + line;
+    const re = /<span [^>]*>|<\/span>/g;
+    let m;
+    while ((m = re.exec(line))) m[0] === '</span>' ? open.pop() : open.push(m[0]);
+    lines.push(s + '</span>'.repeat(open.length));
+  }
+  return lines;
+}
+
+function esc(s){ return s.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+
+function buildSlide(sl){
+  const stage = document.getElementById('stage');
+  stage.innerHTML = '';
+  stage.scrollTop = 0;
+  if (sl.title){
+    const h = document.createElement('h2');
+    h.className = 'title'; h.textContent = sl.title; stage.appendChild(h);
+  }
+  const sub = sl.file || sl.subtitle;
+  if (sub){
+    const p = document.createElement('p');
+    p.className = 'subtitle'; p.textContent = sub; stage.appendChild(p);
+  }
+
+  if (sl.kind === 'bullets'){
+    const ul = document.createElement('ul');
+    ul.className = 'bullets';
+    sl.bullets.forEach(b => { const li = document.createElement('li'); li.textContent = b; ul.appendChild(li); });
+    stage.appendChild(ul);
+
+  } else if (sl.kind === 'code' || sl.kind === 'tree'){
+    const pre = document.createElement('pre');
+    pre.className = 'code';
+    const lang = sl.kind === 'tree' ? null : (sl.lang || null);
+    let lines;
+    if (lang && window.hljs && hljs.getLanguage(lang)){
+      lines = splitHighlighted(hljs.highlight(sl.code, {language: lang}).value);
+    } else {
+      lines = sl.code.split('\n').map(esc);
+    }
+    pre.innerHTML = lines.map((h, i) =>
+      `<div class="row"><span class="gut">${sl.kind === 'tree' ? '' : i + 1}</span><span class="src">${h || ' '}</span></div>`
+    ).join('');
+    stage.appendChild(pre);
+
+  } else if (sl.kind === 'mermaid'){
+    const wrap = document.createElement('div');
+    wrap.className = 'mermaid-wrap';
+    stage.appendChild(wrap);
+    const id = 'mm' + si + '_' + Date.now();
+    mermaid.render(id, sl.mermaid)
+      .then(({svg}) => {
+        wrap.innerHTML = svg;
+        const el = wrap.querySelector('svg');
+        if (el) el.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+        applyStep();
+      })
+      .catch(e => {
+        wrap.innerHTML = '<div class="mmerr">mermaid could not parse this diagram: '
+          + esc(e && e.message ? e.message : String(e)) + '</div>'
+          + '<pre class="code" style="padding:14px 16px">' + esc(sl.mermaid) + '</pre>';
+      });
+
+  } else if (sl.kind === 'image'){
+    const box = document.createElement('div');
+    box.className = 'shot';
+    box.innerHTML = `<img src="${sl.src}" alt="">`;
+    stage.appendChild(box);
+  }
+}
+
+function applyStep(){
+  const sl = S[si], step = sl.steps[ti], lit = step.lit;
+  const stage = document.getElementById('stage');
+
+  if (sl.kind === 'bullets'){
+    const on = new Set(Array.isArray(lit) ? lit : lit === undefined ? [] : [lit]);
+    const top = on.size ? Math.max(...on) : -1;
+    stage.querySelectorAll('ul.bullets li').forEach((li, i) => {
+      li.classList.toggle('on', on.has(i));
+      li.classList.toggle('seen', !on.has(i) && i < top);
+      li.style.visibility = i > top && on.size ? 'hidden' : 'visible';
+    });
+
+  } else if (sl.kind === 'code' || sl.kind === 'tree'){
+    const on = lit === undefined ? null : lineSet(lit);
+    const rows = stage.querySelectorAll('pre.code .row');
+    rows.forEach((r, i) => r.classList.toggle('on', on === null || on.has(i + 1)));
+    if (on){
+      const first = [...rows].find(r => r.classList.contains('on'));
+      if (first) first.scrollIntoView({block: 'nearest', behavior: 'smooth'});
+    }
+
+  } else if (sl.kind === 'mermaid'){
+    const wrap = stage.querySelector('.mermaid-wrap');
+    if (!wrap) return;
+    const ids = Array.isArray(lit) ? lit : lit === undefined ? [] : [lit];
+    wrap.classList.toggle('nolit', ids.length === 0);
+    wrap.querySelectorAll('.node').forEach(n => {
+      const label = (n.textContent || '').trim(), id = n.id || '';
+      n.classList.toggle('on', ids.some(x =>
+        id.split('-').includes(x) || label.includes(x)));
+    });
+
+  } else if (sl.kind === 'image'){
+    stage.querySelectorAll('.spot').forEach(s => s.remove());
+    if (Array.isArray(lit) && lit.length === 4){
+      const box = stage.querySelector('.shot'), d = document.createElement('div');
+      d.className = 'spot';
+      d.style.cssText = `left:${lit[0]}%;top:${lit[1]}%;width:${lit[2]}%;height:${lit[3]}%`;
+      box.appendChild(d);
+    }
+  }
+
+  document.getElementById('say').innerHTML = '<b>' + esc(S[si].steps[ti].say) + '</b>';
+  document.getElementById('pos').textContent =
+    `slide ${si + 1}/${S.length}  ·  step ${ti + 1}/${S[si].steps.length}`;
+  document.querySelectorAll('.toc-item').forEach((el, i) => el.classList.toggle('on', i === si));
+}
+
+function goto(newSi, newTi, autoplay){
+  const slideChanged = newSi !== si || document.getElementById('stage').childElementCount === 0;
+  si = newSi; ti = newTi;
+  if (slideChanged) buildSlide(S[si]);
+  applyStep();
+  au.src = S[si].steps[ti].audio;
+  au.playbackRate = rate;
+  if (autoplay !== false) { au.play().catch(() => {}); playing = true; }
+  syncBtn();
+}
+
+function next(){
+  if (ti + 1 < S[si].steps.length) return goto(si, ti + 1);
+  if (si + 1 < S.length) return goto(si + 1, 0);
+  playing = false; syncBtn();
+}
+function prev(){
+  if (ti > 0) return goto(si, ti - 1);
+  if (si > 0) return goto(si - 1, S[si - 1].steps.length - 1);
+}
+function syncBtn(){
+  document.querySelector('[data-act=play]').textContent = playing && !au.paused ? 'pause' : 'play';
+}
+
+au.addEventListener('ended', next);
+au.addEventListener('loadedmetadata', () => { au.playbackRate = rate; });
+au.addEventListener('timeupdate', () => {
+  if (au.duration) document.getElementById('fill').style.width = (au.currentTime / au.duration * 100) + '%';
+});
+
+document.getElementById('ctl').addEventListener('click', e => {
+  const act = e.target.dataset.act;
+  if (act === 'next') next();
+  else if (act === 'prev') prev();
+  else if (act === 'rate') setRate(RATES[(RATES.indexOf(rate) + 1) % RATES.length]);
+  else if (act === 'play'){ au.paused ? au.play() : au.pause(); playing = !au.paused; syncBtn(); }
+});
+
+document.addEventListener('keydown', e => {
+  if (document.getElementById('cover').classList.contains('gone') === false) return;
+  const k = e.key;
+  if (k === ' '){ e.preventDefault(); au.paused ? au.play() : au.pause(); playing = !au.paused; syncBtn(); }
+  else if (k === 'ArrowRight') next();
+  else if (k === 'ArrowLeft') prev();
+  else if (k === 'ArrowDown' && si + 1 < S.length) goto(si + 1, 0);
+  else if (k === 'ArrowUp' && si > 0) goto(si - 1, 0);
+  else if (k === ']') bumpRate(1);
+  else if (k === '[') bumpRate(-1);
+});
+
+/* Build the sidebar and cover, then wait for the click Chrome requires before
+   it will let a page play sound on its own. */
+(function init(){
+  document.title = D.title || 'Explainer';
+  document.getElementById('covertitle').textContent = D.title || 'Explainer';
+  const steps = S.reduce((n, s) => n + s.steps.length, 0);
+  const secs = S.reduce((n, s) => n + s.steps.reduce((m, t) => m + (t.duration || 0), 0), 0);
+  document.getElementById('covermeta').textContent =
+    `${S.length} slides · ${steps} steps · ${Math.round(secs / 60)} min`;
+
+  document.getElementById('toclist').innerHTML = S.map((s, i) =>
+    `<div class="toc-item" data-i="${i}"><span class="n">${String(i + 1).padStart(2, '0')}</span>${esc(s.title || s.kind)}</div>`
+  ).join('');
+  document.getElementById('toclist').addEventListener('click', e => {
+    const item = e.target.closest('.toc-item');
+    if (item) goto(+item.dataset.i, 0);
+  });
+
+  if (window.mermaid) mermaid.initialize({startOnLoad: false, theme: 'dark',
+    htmlLabels: false, flowchart: {htmlLabels: false, curve: 'basis'},
+    themeVariables: {background: '#0e1116', primaryColor: '#141922', primaryTextColor: '#e6edf6',
+      primaryBorderColor: '#2c3a4f', lineColor: '#5a6b82', fontSize: '15px',
+      edgeLabelBackground: '#0e1116'}});
+
+  setRate(RATES.includes(rate) ? rate : 1);
+
+  document.getElementById('start').addEventListener('click', () => {
+    document.getElementById('cover').classList.add('gone');
+    goto(0, 0);
+  });
+})();
+</script>
+</body>
+</html>
