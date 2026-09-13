@@ -12,15 +12,11 @@ Speech is synthesised on your machine. Your code never leaves it.
 
 ## Install
 
-Clone it into wherever your coding agent keeps skills:
-
 ```bash
-git clone https://github.com/<you>/explain ~/.claude/skills/explain
+npx skills add vishalx360/explain-skill
 ```
 
-Other agents use other directories — `.agents/skills/`, `.cursor/skills/`,
-`~/.config/<agent>/skills/`. The skill is a plain folder with a `SKILL.md`; drop
-it in and the agent picks it up. Then ask your agent to explain something:
+Then ask your agent to explain something:
 
 ```
 /explain how does the ingestion pipeline choose a parser?
