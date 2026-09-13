@@ -119,6 +119,7 @@ pre.code .src{white-space:pre;flex:1}
 #cover p{color:var(--dim);margin:0;font-family:var(--mono);font-size:13px}
 #cover button{background:var(--accent);color:var(--accent-ink);border:0;border-radius:999px;
   padding:13px 30px;font:600 15px var(--sans);cursor:pointer}
+#cover button:disabled{opacity:.45;cursor:not-allowed}
 #cover.gone{display:none}
 
 @media (max-width:760px){
@@ -163,7 +164,16 @@ pre.code .src{white-space:pre;flex:1}
 
 <script>window.DECK = /*DECK*/null;</script>
 <script>
-const D = window.DECK, S = D.slides, au = document.getElementById('au');
+const D = window.DECK;
+if (!D || !Array.isArray(D.slides)) {
+  document.title = 'Explainer template';
+  document.getElementById('covertitle').textContent = 'This is the player template';
+  document.getElementById('covermeta').textContent =
+    'Build a deck.json and open the generated HTML presentation instead.';
+  document.getElementById('start').disabled = true;
+  throw new Error('player.html is a build template; no deck data was injected');
+}
+const S = D.slides, au = document.getElementById('au');
 let si = 0, ti = 0, playing = false;
 
 /* Display preferences survive reloads without becoming part of deck data. */

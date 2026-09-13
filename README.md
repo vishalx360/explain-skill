@@ -56,6 +56,9 @@ node build.mjs path/to/deck.json --folder # multi-file form, for very long decks
 node build.mjs path/to/deck.json --no-open
 ```
 
+`player.html` is the build template, not a standalone presentation. Open the
+generated HTML file printed by the build command.
+
 See [SKILL.md](SKILL.md) for the deck format and the guidance the agent follows.
 
 ## Controls
