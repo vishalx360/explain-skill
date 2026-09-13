@@ -36,8 +36,8 @@ You write `deck.json`. The build script does the rest.
 4. Tell the user the path to the HTML file in one line. Don't summarise the deck
    back at them in text - the deck is the deliverable, and repeating it defeats
    the point. Worth mentioning once: space pauses, arrow keys navigate, `S`
-   toggles the sidebar, `T` changes theme, `F` enters full screen, and every
-   slide is clickable in the sidebar.
+   toggles the sidebar, `T` changes theme, `F` enters full screen, `?` opens
+   help, and every slide is clickable in the sidebar.
 
 **First run takes longer.** The script installs what it needs into its own
 directory and downloads a speech model. That is a one-time cost of a minute or

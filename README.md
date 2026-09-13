@@ -64,7 +64,7 @@ See [SKILL.md](SKILL.md) for the deck format and the guidance the agent follows.
 ## Controls
 
 `space` pause · arrow keys navigate · `[` `]` speed · `S` sidebar · `T` theme ·
-`F` full screen · click any slide in the sidebar.
+`F` full screen · `?` help · click any slide in the sidebar.
 
 ## License
 

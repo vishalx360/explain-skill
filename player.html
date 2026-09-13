@@ -13,6 +13,7 @@
   --error-line:#5c2b2f; --spot:rgba(9,12,17,.62);
   --syntax-red:#ff7b72; --syntax-blue:#a5d6ff; --syntax-comment:#8b949e;
   --syntax-cyan:#79c0ff; --syntax-purple:#d2a8ff; --syntax-orange:#ffa657;
+  --shadow:0 18px 50px rgba(0,0,0,.32); --overlay:rgba(3,7,18,.66);
   --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
   --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,system-ui,sans-serif;
   color-scheme:dark;
@@ -24,6 +25,7 @@
   --error-line:#fecdd3; --spot:rgba(23,32,51,.42);
   --syntax-red:#cf222e; --syntax-blue:#0a3069; --syntax-comment:#6e7781;
   --syntax-cyan:#0550ae; --syntax-purple:#8250df; --syntax-orange:#953800;
+  --shadow:0 18px 50px rgba(23,32,51,.16); --overlay:rgba(23,32,51,.28);
   color-scheme:light;
 }
 *{box-sizing:border-box}
@@ -32,21 +34,40 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);over
 
 #app{display:flex;height:100vh}
 
-#toc{width:260px;flex:0 0 260px;background:var(--panel);border-right:1px solid var(--line);
-     overflow-y:auto;padding:18px 0;transition:width .22s ease,flex-basis .22s ease,
-     opacity .16s ease,transform .22s ease}
+#toc{width:288px;flex:0 0 288px;background:var(--panel);border-right:1px solid var(--line);
+     overflow:hidden;display:flex;flex-direction:column;transition:width .22s ease,
+     flex-basis .22s ease,opacity .16s ease,transform .22s ease}
 #app.toc-hidden #toc{width:0;flex-basis:0;opacity:0;transform:translateX(-16px);
   overflow:hidden;border-right:0;padding-left:0;padding-right:0;pointer-events:none}
-#toc h1{font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;
-        color:var(--dim);margin:0 18px 14px}
-.toc-item{padding:9px 18px;font-size:13.5px;line-height:1.35;color:var(--dim);cursor:pointer;
-          border-left:2px solid transparent}
-.toc-item:hover{color:var(--ink)}
-.toc-item.on{color:var(--ink);border-left-color:var(--accent);background:var(--toc-on)}
+.sidehead{height:68px;flex:0 0 68px;padding:0 14px 0 20px;display:flex;align-items:center;
+  justify-content:space-between;border-bottom:1px solid var(--line)}
+.brand{display:flex;flex-direction:column;gap:2px;min-width:0}
+.brand .eyebrow{font:600 10px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.brand strong{font-size:15px;font-weight:600;letter-spacing:-.01em}
+#toclist{padding:10px;overflow-y:auto;flex:1}
+.toc-item{padding:10px 12px;font-size:13.5px;line-height:1.35;color:var(--dim);cursor:pointer;
+  border-radius:8px;border:1px solid transparent;margin:2px 0;transition:color .15s,background .15s;
+  display:block;width:100%;text-align:left;background:transparent;font-family:var(--sans)}
+.toc-item:hover{color:var(--ink);background:var(--toc-on)}
+.toc-item.on{color:var(--ink);border-color:var(--line);background:var(--toc-on)}
 .toc-item .n{font-family:var(--mono);font-size:11px;opacity:.55;margin-right:8px}
 
-main{flex:1;display:flex;flex-direction:column;min-width:0}
-#stage{flex:1;overflow:auto;padding:44px 56px 20px;display:flex;flex-direction:column}
+main{flex:1;display:flex;flex-direction:column;min-width:0;position:relative}
+#topbar{position:absolute;top:14px;left:20px;right:20px;z-index:6;display:flex;
+  align-items:center;pointer-events:none}
+#topbar>*{pointer-events:auto}
+.toolbar{margin-left:auto;display:flex;align-items:center;gap:4px;background:var(--panel);
+  border:1px solid var(--line);border-radius:11px;padding:4px;box-shadow:var(--shadow)}
+.iconbtn,.menubtn{border:0;background:transparent;color:var(--dim);height:34px;min-width:34px;
+  border-radius:8px;font:500 13px var(--sans);cursor:pointer;display:inline-flex;align-items:center;
+  justify-content:center;gap:8px;padding:0 9px;transition:color .15s,background .15s,opacity .18s}
+.iconbtn:hover,.menubtn:hover{color:var(--ink);background:var(--toc-on)}
+.iconbtn:focus-visible,.menubtn:focus-visible,#ctl button:focus-visible,#start:focus-visible{
+  outline:2px solid var(--accent);outline-offset:2px}
+.menubtn{background:var(--panel);border:1px solid var(--line);box-shadow:var(--shadow);padding:0 12px}
+#app:not(.toc-hidden) #menubtn{opacity:0;visibility:hidden;transform:translateX(-8px)}
+#stage{flex:1;overflow:auto;padding:86px clamp(28px,4vw,72px) 24px;display:flex;flex-direction:column}
+#stage>*{width:min(100%,1280px);margin-left:auto;margin-right:auto}
 h2.title{font-size:30px;line-height:1.2;margin:0 0 6px;font-weight:600;letter-spacing:-.01em}
 .subtitle{font-family:var(--mono);font-size:12.5px;color:var(--dim);margin:0 0 26px}
 
@@ -98,20 +119,38 @@ pre.code .src{white-space:pre;flex:1}
 .spot{position:absolute;border:2px solid var(--accent);border-radius:6px;
   box-shadow:0 0 0 9999px var(--spot);transition:all .4s}
 
-#say{flex:0 0 auto;padding:16px 56px 12px;font-size:15.5px;line-height:1.5;color:var(--dim);
-  border-top:1px solid var(--line);min-height:64px}
-#say b{color:var(--ink);font-weight:400}
+#say{flex:0 0 auto;padding:17px clamp(28px,4vw,72px) 13px;font-size:15.5px;line-height:1.5;
+  color:var(--dim);border-top:1px solid var(--line);min-height:64px;background:var(--panel)}
+#say b{color:var(--ink);font-weight:400;display:block;max-width:1280px;margin:auto}
 
 #bar{height:3px;background:var(--line)}
 #fill{height:100%;width:0;background:var(--accent);transition:width .2s linear}
 
-#ctl{flex:0 0 auto;display:flex;align-items:center;gap:16px;padding:10px 56px 16px;
-  font-size:12.5px;color:var(--dim);font-family:var(--mono)}
-#ctl button{background:none;border:1px solid var(--line);color:var(--dim);border-radius:6px;
-  padding:5px 11px;font:inherit;cursor:pointer}
-#ctl button:hover{color:var(--ink);border-color:var(--dim)}
+#ctl{flex:0 0 auto;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;
+  padding:10px clamp(28px,4vw,72px) 16px;font-size:12px;color:var(--dim);
+  font-family:var(--mono);background:var(--panel)}
+#ctl button{background:transparent;border:1px solid var(--line);color:var(--dim);border-radius:8px;
+  min-width:38px;height:34px;padding:0 11px;font:inherit;cursor:pointer}
+#ctl button:hover{color:var(--ink);border-color:var(--dim);background:var(--toc-on)}
 #ctl button[aria-pressed="true"]{color:var(--ink);border-color:var(--accent);background:var(--lit)}
-#ctl .spacer{flex:1}
+.transport{display:flex;align-items:center;gap:6px;justify-self:center}
+.transport [data-act="play"]{min-width:74px;color:var(--accent);border-color:var(--accent)}
+#pos{justify-self:start}
+#rate{justify-self:end}
+
+#help{width:min(440px,calc(100vw - 32px));background:var(--panel);color:var(--ink);
+  border:1px solid var(--line);border-radius:16px;padding:0;box-shadow:var(--shadow)}
+#help::backdrop{background:var(--overlay);backdrop-filter:blur(3px)}
+.helphead{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;
+  border-bottom:1px solid var(--line)}
+.helphead h3{font-size:17px;margin:0;letter-spacing:-.01em}
+.helpbody{padding:18px 20px 22px}
+.helpbody p{margin:0 0 16px;color:var(--dim);font-size:13.5px;line-height:1.5}
+.shortcut-grid{display:grid;grid-template-columns:1fr auto;gap:10px 20px;align-items:center;
+  font-size:13.5px}
+.shortcut-grid span{color:var(--dim)}
+kbd{font:500 12px var(--mono);color:var(--ink);background:var(--bg);border:1px solid var(--line);
+  border-bottom-width:2px;border-radius:6px;padding:4px 7px;min-width:34px;text-align:center}
 
 #cover{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;
   align-items:center;justify-content:center;gap:22px;z-index:9;text-align:center;padding:32px}
@@ -124,35 +163,71 @@ pre.code .src{white-space:pre;flex:1}
 
 @media (max-width:760px){
   #toc{position:fixed;inset:0 auto 0 0;z-index:7;box-shadow:12px 0 32px rgba(0,0,0,.2)}
-  #stage{padding:30px 24px 16px}
+  #stage{padding:76px 24px 16px}
   #say{padding:14px 24px 10px}
-  #ctl{padding:10px 24px 14px;gap:8px;flex-wrap:wrap}
-  #ctl .hint{display:none}
+  #ctl{padding:10px 24px 14px;grid-template-columns:auto 1fr auto}
+  .transport{justify-self:center}
+  .toolbar{box-shadow:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important}
 }
 </style>
 </head>
 <body>
 
 <div id="app">
-  <aside id="toc"><h1>Slides</h1><div id="toclist"></div></aside>
+  <aside id="toc" aria-label="slide navigation">
+    <div class="sidehead">
+      <div class="brand"><span class="eyebrow">Explainer</span><strong>Slides</strong></div>
+      <button class="iconbtn" data-act="toc" id="tocbtn" title="collapse slides" aria-label="collapse slides">&#8249;</button>
+    </div>
+    <div id="toclist"></div>
+  </aside>
   <main>
+    <div id="topbar">
+      <button class="menubtn" data-act="toc" id="menubtn" title="show slides" aria-label="show slides">
+        <span aria-hidden="true">&#9776;</span><span>Slides</span>
+      </button>
+      <div class="toolbar" aria-label="display controls">
+        <button class="iconbtn" data-act="theme" id="themebtn" title="switch color theme" aria-label="switch color theme">&#9728;</button>
+        <button class="iconbtn" data-act="help" id="helpbtn" title="keyboard shortcuts" aria-label="keyboard shortcuts">?</button>
+        <button class="iconbtn" data-act="fullscreen" id="fullscreenbtn" title="enter full screen" aria-label="enter full screen">&#9974;</button>
+      </div>
+    </div>
     <div id="stage"></div>
     <div id="say"></div>
     <div id="bar"><div id="fill"></div></div>
     <div id="ctl">
-      <button data-act="prev">&larr; back</button>
-      <button data-act="play">pause</button>
-      <button data-act="next">next &rarr;</button>
-      <button data-act="rate" id="rate" title="playback speed">1&times;</button>
-      <button data-act="toc" id="tocbtn" title="show or hide slides" aria-pressed="false">hide slides</button>
-      <button data-act="theme" id="themebtn" title="switch color theme">light mode</button>
-      <button data-act="fullscreen" id="fullscreenbtn" title="enter full screen">full screen</button>
-      <span class="spacer"></span>
       <span id="pos"></span>
-      <span class="hint">space&nbsp;pause &middot; arrows&nbsp;navigate &middot; S&nbsp;slides &middot; T&nbsp;theme &middot; F&nbsp;full screen</span>
+      <div class="transport">
+        <button data-act="prev" title="previous step" aria-label="previous step">&larr;</button>
+        <button data-act="play">pause</button>
+        <button data-act="next" title="next step" aria-label="next step">&rarr;</button>
+      </div>
+      <button data-act="rate" id="rate" title="playback speed" aria-label="change playback speed">1&times;</button>
     </div>
   </main>
 </div>
+
+<dialog id="help" aria-labelledby="help-title">
+  <div class="helphead">
+    <h3 id="help-title">Keyboard shortcuts</h3>
+    <button class="iconbtn" data-act="close-help" aria-label="close keyboard shortcuts">&#215;</button>
+  </div>
+  <div class="helpbody">
+    <p>The presentation advances automatically with the narration. You can take control at any time.</p>
+    <div class="shortcut-grid">
+      <span>Play or pause</span><kbd>Space</kbd>
+      <span>Previous or next step</span><kbd>&larr; &rarr;</kbd>
+      <span>Previous or next slide</span><kbd>&uarr; &darr;</kbd>
+      <span>Change playback speed</span><kbd>[ ]</kbd>
+      <span>Show or hide slides</span><kbd>S</kbd>
+      <span>Switch theme</span><kbd>T</kbd>
+      <span>Enter full screen</span><kbd>F</kbd>
+    </div>
+  </div>
+</dialog>
 
 <div id="cover">
   <h1 id="covertitle"></h1>
@@ -202,8 +277,10 @@ function setTheme(value, rerender){
   theme = value === 'light' ? 'light' : 'dark';
   document.documentElement.dataset.theme = theme;
   const btn = document.getElementById('themebtn');
-  btn.textContent = theme === 'dark' ? 'light mode' : 'dark mode';
-  btn.setAttribute('aria-label', `switch to ${theme === 'dark' ? 'light' : 'dark'} mode`);
+  const next = theme === 'dark' ? 'light' : 'dark';
+  btn.textContent = theme === 'dark' ? '\u2600' : '\u263e';
+  btn.title = `switch to ${next} mode`;
+  btn.setAttribute('aria-label', `switch to ${next} mode`);
   try { localStorage.setItem('explain-theme', theme); } catch (e) {}
   mermaidTheme();
   if (rerender && S[si].kind === 'mermaid') buildSlide(S[si]);
@@ -212,16 +289,16 @@ function setTheme(value, rerender){
 function setToc(hidden){
   tocHidden = hidden;
   document.getElementById('app').classList.toggle('toc-hidden', hidden);
-  const btn = document.getElementById('tocbtn');
-  btn.textContent = hidden ? 'show slides' : 'hide slides';
-  btn.setAttribute('aria-pressed', String(hidden));
+  document.getElementById('tocbtn').setAttribute('aria-expanded', String(!hidden));
+  document.getElementById('menubtn').setAttribute('aria-expanded', String(!hidden));
   try { localStorage.setItem('explain-toc-hidden', hidden); } catch (e) {}
 }
 
 function syncFullscreen(){
   const on = !!document.fullscreenElement;
   const btn = document.getElementById('fullscreenbtn');
-  btn.textContent = on ? 'exit full screen' : 'full screen';
+  btn.title = on ? 'exit full screen' : 'enter full screen';
+  btn.setAttribute('aria-label', btn.title);
   btn.setAttribute('aria-pressed', String(on));
 }
 
@@ -230,6 +307,12 @@ async function toggleFullscreen(){
     if (document.fullscreenElement) await document.exitFullscreen();
     else await document.documentElement.requestFullscreen();
   } catch (e) {}
+}
+
+function setHelp(open){
+  const help = document.getElementById('help');
+  if (open && !help.open) help.showModal();
+  else if (!open && help.open) help.close();
 }
 
 /* Playback speed. Setting src resets playbackRate in some browsers, so the
@@ -408,7 +491,10 @@ function prev(){
   if (si > 0) return goto(si - 1, S[si - 1].steps.length - 1);
 }
 function syncBtn(){
-  document.querySelector('[data-act=play]').textContent = playing && !au.paused ? 'pause' : 'play';
+  const btn = document.querySelector('[data-act=play]');
+  const active = playing && !au.paused;
+  btn.textContent = active ? 'pause' : 'play';
+  btn.setAttribute('aria-label', active ? 'pause narration' : 'play narration');
 }
 
 au.addEventListener('ended', next);
@@ -417,20 +503,29 @@ au.addEventListener('timeupdate', () => {
   if (au.duration) document.getElementById('fill').style.width = (au.currentTime / au.duration * 100) + '%';
 });
 
-document.getElementById('ctl').addEventListener('click', e => {
-  const act = e.target.dataset.act;
+document.addEventListener('click', e => {
+  const control = e.target.closest('[data-act]');
+  if (!control) return;
+  const act = control.dataset.act;
   if (act === 'next') next();
   else if (act === 'prev') prev();
   else if (act === 'rate') setRate(RATES[(RATES.indexOf(rate) + 1) % RATES.length]);
   else if (act === 'toc') setToc(!tocHidden);
   else if (act === 'theme') setTheme(theme === 'dark' ? 'light' : 'dark', true);
   else if (act === 'fullscreen') toggleFullscreen();
+  else if (act === 'help') setHelp(true);
+  else if (act === 'close-help') setHelp(false);
   else if (act === 'play'){ au.paused ? au.play() : au.pause(); playing = !au.paused; syncBtn(); }
+});
+
+document.getElementById('help').addEventListener('click', e => {
+  if (e.target === e.currentTarget) setHelp(false);
 });
 
 document.addEventListener('fullscreenchange', syncFullscreen);
 
 document.addEventListener('keydown', e => {
+  if (document.getElementById('help').open) return;
   if (document.getElementById('cover').classList.contains('gone') === false) return;
   const k = e.key;
   if (k === ' '){ e.preventDefault(); au.paused ? au.play() : au.pause(); playing = !au.paused; syncBtn(); }
@@ -443,6 +538,7 @@ document.addEventListener('keydown', e => {
   else if (k.toLowerCase() === 's') setToc(!tocHidden);
   else if (k.toLowerCase() === 't') setTheme(theme === 'dark' ? 'light' : 'dark', true);
   else if (k.toLowerCase() === 'f') toggleFullscreen();
+  else if (k === '?') setHelp(true);
 });
 
 /* Build the sidebar and cover, then wait for the click Chrome requires before
@@ -456,7 +552,7 @@ document.addEventListener('keydown', e => {
     `${S.length} slides · ${steps} steps · ${Math.round(secs / 60)} min`;
 
   document.getElementById('toclist').innerHTML = S.map((s, i) =>
-    `<div class="toc-item" data-i="${i}"><span class="n">${String(i + 1).padStart(2, '0')}</span>${esc(s.title || s.kind)}</div>`
+    `<button type="button" class="toc-item" data-i="${i}"><span class="n">${String(i + 1).padStart(2, '0')}</span>${esc(s.title || s.kind)}</button>`
   ).join('');
   document.getElementById('toclist').addEventListener('click', e => {
     const item = e.target.closest('.toc-item');
